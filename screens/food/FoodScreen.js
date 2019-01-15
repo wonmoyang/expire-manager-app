@@ -5,15 +5,41 @@ import {
   Text,
   TouchableOpacity,
   View,
+  Platform,
+  Alert,
+
+  Button
 } from 'react-native';
 import { WebBrowser } from 'expo';
 import { MonoText } from '../../components/StyledText';
+import { Ionicons } from '@expo/vector-icons';
 import styles from './FoodStyle';
 
 export default class FoodScreen extends React.Component {
 
-  static navigationOptions = {
-    header: null,
+  static navigationOptions = ({ navigation }) => {
+
+    return {
+      title: '유통기한',
+      headerLeft: (
+        <Ionicons
+          name={Platform.OS === 'ios' ? 'ios-menu' : 'md-menu '}
+          onPress={() => {
+            Alert.alert('메뉴');
+          }}
+          size={32}
+          style={{ paddingLeft: 10 }}
+        />
+      ),
+      headerRight: (
+        <Ionicons
+          name={Platform.OS === 'ios' ? 'ios-add' : 'md-add '}
+          onPress={() => navigation.navigate('FoodCreate')}
+          size={32}
+          style={{ paddingRight: 10 }}
+        />
+      ),
+    };
   };
 
   render() {

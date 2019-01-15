@@ -5,11 +5,14 @@ import { createStackNavigator, createBottomTabNavigator } from 'react-navigation
 import TabBarIcon from '../components/TabBarIcon';
 
 import FoodScreen from '../screens/food/FoodScreen';
+import FoodCreateScreen from '../screens/food/FoodCreateScreen';
+
 import BeautyScreen from '../screens/beauty/BeautyScreen';
 import SettingScreen from '../screens/setting/SettingScreen';
 
 const FoodStack = createStackNavigator({
   Food: FoodScreen,
+  FoodCreate: FoodCreateScreen
 });
 FoodStack.navigationOptions = {
   tabBarLabel: 'Food',
