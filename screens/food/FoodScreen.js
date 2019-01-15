@@ -6,9 +6,7 @@ import {
   TouchableOpacity,
   View,
   Platform,
-  Alert,
-
-  Button
+  Alert
 } from 'react-native';
 import { WebBrowser } from 'expo';
 import { MonoText } from '../../components/StyledText';
@@ -21,6 +19,7 @@ export default class FoodScreen extends React.Component {
 
     return {
       title: '유통기한',
+      headerBackTitle: '저장',
       headerLeft: (
         <Ionicons
           name={Platform.OS === 'ios' ? 'ios-menu' : 'md-menu '}
@@ -32,12 +31,20 @@ export default class FoodScreen extends React.Component {
         />
       ),
       headerRight: (
+        <React.Fragment>
         <Ionicons
-          name={Platform.OS === 'ios' ? 'ios-add' : 'md-add '}
+          name={Platform.OS === 'ios' ? 'ios-barcode' : 'md-barcode'}
+          onPress={() => navigation.navigate('FoodBarcode')}
+          size={32}
+          style={{ paddingRight: 10 }}
+        />
+        <Ionicons
+          name={Platform.OS === 'ios' ? 'ios-add' : 'md-add'}
           onPress={() => navigation.navigate('FoodCreate')}
           size={32}
           style={{ paddingRight: 10 }}
         />
+        </React.Fragment>
       ),
     };
   };
@@ -57,7 +64,10 @@ export default class FoodScreen extends React.Component {
               style={styles.welcomeImage}
             />
           </View>
-
+          <Text style={styles.getStartedText}>
+              {'메인 영역 ( 음식 유통기한 리스트 )'}
+          </Text>
+          {/*
           <View style={styles.getStartedContainer}>
             {this._maybeRenderDevelopmentModeWarning()}
 
@@ -77,8 +87,10 @@ export default class FoodScreen extends React.Component {
               <Text style={styles.helpLinkText}>Help, it didn’t automatically reload!</Text>
             </TouchableOpacity>
           </View>
-        </ScrollView>
 
+          */}
+        </ScrollView>
+          {/*
         <View style={styles.tabBarInfoContainer}>
           <Text style={styles.tabBarInfoText}>This is a tab bar. You can edit it in:</Text>
 
@@ -86,6 +98,7 @@ export default class FoodScreen extends React.Component {
             <MonoText style={styles.codeHighlightText}>navigation/MainTabNavigator.js</MonoText>
           </View>
         </View>
+          */}
       </View>
     );
   }

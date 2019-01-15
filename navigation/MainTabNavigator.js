@@ -6,13 +6,15 @@ import TabBarIcon from '../components/TabBarIcon';
 
 import FoodScreen from '../screens/food/FoodScreen';
 import FoodCreateScreen from '../screens/food/FoodCreateScreen';
+import FoodBarcodeScreen from '../screens/food/FoodBarcodeScreen';
 
 import BeautyScreen from '../screens/beauty/BeautyScreen';
 import SettingScreen from '../screens/setting/SettingScreen';
 
 const FoodStack = createStackNavigator({
   Food: FoodScreen,
-  FoodCreate: FoodCreateScreen
+  FoodCreate: FoodCreateScreen,
+  FoodBarcode: FoodBarcodeScreen
 });
 FoodStack.navigationOptions = {
   tabBarLabel: 'Food',
