@@ -3,48 +3,42 @@ import { Platform } from 'react-native';
 import { createStackNavigator, createBottomTabNavigator } from 'react-navigation';
 
 import TabBarIcon from '../components/TabBarIcon';
-import HomeScreen from '../screens/HomeScreen';
-import LinksScreen from '../screens/LinksScreen';
-import SettingsScreen from '../screens/SettingsScreen';
 
-const HomeStack = createStackNavigator({
-  Home: HomeScreen,
+import FoodScreen from '../screens/food/FoodScreen';
+import BeautyScreen from '../screens/beauty/BeautyScreen';
+import SettingScreen from '../screens/setting/SettingScreen';
+
+const FoodStack = createStackNavigator({
+  Food: FoodScreen,
 });
-
-HomeStack.navigationOptions = {
-  tabBarLabel: 'Home',
+FoodStack.navigationOptions = {
+  tabBarLabel: 'Food',
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
       focused={focused}
-      name={
-        Platform.OS === 'ios'
-          ? `ios-information-circle${focused ? '' : '-outline'}`
-          : 'md-information-circle'
-      }
+      name={Platform.OS === 'ios' ? 'ios-nutrition' : 'md-nutrition'}
     />
   ),
 };
 
-const LinksStack = createStackNavigator({
-  Links: LinksScreen,
+const beautyStack = createStackNavigator({
+  Beauty: BeautyScreen,
 });
-
-LinksStack.navigationOptions = {
-  tabBarLabel: 'Links',
+beautyStack.navigationOptions = {
+  tabBarLabel: 'Beauty',
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
       focused={focused}
-      name={Platform.OS === 'ios' ? 'ios-link' : 'md-link'}
+      name={Platform.OS === 'ios' ? 'ios-heart' : 'md-heart'}
     />
   ),
 };
 
-const SettingsStack = createStackNavigator({
-  Settings: SettingsScreen,
+const SettingStack = createStackNavigator({
+  Setting: SettingScreen,
 });
-
-SettingsStack.navigationOptions = {
-  tabBarLabel: 'Settings',
+SettingStack.navigationOptions = {
+  tabBarLabel: 'Setting',
   tabBarIcon: ({ focused }) => (
     <TabBarIcon
       focused={focused}
@@ -54,7 +48,7 @@ SettingsStack.navigationOptions = {
 };
 
 export default createBottomTabNavigator({
-  HomeStack,
-  LinksStack,
-  SettingsStack,
+  FoodStack,
+  beautyStack,
+  SettingStack,
 });
