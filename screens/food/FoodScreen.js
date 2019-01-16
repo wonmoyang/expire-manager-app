@@ -3,23 +3,21 @@ import {
   Image,
   ScrollView,
   Text,
-  TouchableOpacity,
   View,
   Platform,
   Alert
 } from 'react-native';
 import { WebBrowser } from 'expo';
-import { MonoText } from '../../components/StyledText';
 import { Ionicons } from '@expo/vector-icons';
-import styles from './FoodStyle';
+import { styles } from './FoodStyle';
 
 export default class FoodScreen extends React.Component {
 
-  static navigationOptions = ({ navigation }) => {
 
+  static navigationOptions = ({ navigation }) => {
     return {
       title: '유통기한',
-      headerBackTitle: '저장',
+      headerBackTitle: '',
       headerLeft: (
         <Ionicons
           name={Platform.OS === 'ios' ? 'ios-menu' : 'md-menu '}
@@ -45,9 +43,10 @@ export default class FoodScreen extends React.Component {
           style={{ paddingRight: 10 }}
         />
         </React.Fragment>
-      ),
+      )
     };
   };
+
 
   render() {
     
