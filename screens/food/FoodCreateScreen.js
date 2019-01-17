@@ -1,7 +1,7 @@
 import React from 'react';
-import { ScrollView, Button, Alert } from 'react-native';
+import { ScrollView, Alert } from 'react-native';
 import { FormLabel, FormInput, FormValidationMessage } from 'react-native-elements'
-import { Ionicons } from '@expo/vector-icons';
+import { Container, Header, Title, Body, Content, Left, Right, Form, Item, Input, Label, Icon, Button, Text } from 'native-base';
 import { getYear } from '../shared/common/DateUtil';
 
 import { SQLite } from 'expo';
@@ -16,13 +16,10 @@ export default class FoodCreateScreen extends React.Component {
   constructor(props){
     super(props);
 
-    this.props.navigation.setParams({
-      _save: this._save
-     })
-
     this.state = {
-      name:'',
+      name: '',
       date: getYear()+'',
+      note: '',
 
       error: {
         name: false,
@@ -31,27 +28,19 @@ export default class FoodCreateScreen extends React.Component {
     }
   }
 
-  static navigationOptions = ({ navigation }) => {
-    return {
-      title: '상품 입력',
-      headerRight: (
-        <Button
-          onPress={() => {
-            navigation.state.params._save();
-          }}
-          title="저장"
-        />
-      )
-    }
-  };
+  static navigationOptions = {
+    header: null
+  }
 
   _save = async () => {
     db.transaction(tx => {
-      tx.executeSql('insert into expire (name, date) values (?, ?)', [
+      tx.executeSql(Query.EXPIRE.SAVE, [
         this.state.name,
+        this.state.note,
         this.state.date]);
     });
-    Alert.alert('저장되었습니다.');
+
+    this.props.navigation.state.params.success();
     this.props.navigation.navigate('Food');
   }
 
@@ -94,24 +83,65 @@ export default class FoodCreateScreen extends React.Component {
     });
   }
 
+  _onChangeNote = (v) => {
+    this.setState({
+      note: v
+    });
+  }
+
   render() {
     const styles = createStyle; 
     const { name, date, error } = this.state;
     return (
-      <ScrollView style={styles.container}>
-        <FormLabel>상품명 {name}</FormLabel>
-        <FormInput autoFocus onChangeText={(v) => {this._onChangeName(v)}} onBlur={() => {this._onBlurName()}}/>
-        {
-          error.name ? (<FormValidationMessage>Error message</FormValidationMessage>) : null
-        }
-
-        <FormLabel>날짜</FormLabel>
-        <FormInput keyboardType={'number-pad'} onChangeText={(v) => {this._onChangeDate(v)}} onBlur={() => {this._onBlurDate()}} defaultValue={date} maxLength={10}/>
-        {
-          error.date ? (<FormValidationMessage>Error message</FormValidationMessage>) : null
-        }
+      <Container>
+        <Header>
+        <Left>
+            <Button 
+              transparent
+              onPress={() => {this.props.navigation.goBack()}}>
+              <Icon name='arrow-back' />
+            </Button>
+          </Left>
+          <Body>
+            <Title>상품 입력</Title>
+          </Body>
         
-      </ScrollView>
+          <Right>
+            <Button 
+              hasText 
+              transparent
+              onPress={() => {this._save()}}>
+              <Text>저장</Text>
+            </Button>
+          </Right>
+        </Header>
+
+        <Content>
+          <Form>
+            <Item stackedLabel>
+              <Label>상품명</Label>
+              <Input 
+                onChangeText={(v) => {this._onChangeName(v)}}
+                />
+            </Item>
+            <Item stackedLabel>
+              <Label>날짜</Label>
+              <Input
+                defaultValue={date}
+                maxLength={10}
+                keyboardType={'number-pad'}
+                onChangeText={(v) => {this._onChangeDate(v)}}
+               />
+            </Item>
+            <Item stackedLabel last>
+              <Label>메모</Label>
+              <Input 
+                onChangeText={(v) => {this._onChangeNote(v)}}
+              />
+            </Item>
+          </Form>
+        </Content>
+      </Container>
     );
   }
 };

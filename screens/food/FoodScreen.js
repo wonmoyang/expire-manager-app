@@ -4,7 +4,22 @@ import {
   Alert,
   RefreshControl
 } from 'react-native';
-import { Container, Header, Left, Body, Right, Button, Icon, Title, List, ListItem, Text, Content } from 'native-base';
+import { 
+  Container, 
+  Header, 
+  Left, 
+  Body, 
+  Right, 
+  Button, 
+  Icon, 
+  Title, 
+  List, 
+  ListItem, 
+  Text, 
+  Content,
+  SwipeRow,
+  View
+} from 'native-base';
 
 import { WebBrowser, SQLite } from 'expo';
 import { Ionicons } from '@expo/vector-icons';
@@ -71,11 +86,13 @@ export default class FoodScreen extends React.Component {
     this.props.navigation.setParams({
       _toggleSearchBar: this._toggleSearchBar
     })
-
   }
+  
+  shouldComponentUpdate(nextProps, nextState) {
+    return true;
+}
 
   _toggleSearchBar = () => {
-    debugger;
     this.setState({
       isSearchBar: !this.state.isSearchBar
     })
@@ -93,9 +110,20 @@ export default class FoodScreen extends React.Component {
     });
   }
 
+  _success = () => {
+    db.transaction(tx => {
+      tx.executeSql('select * from expire', [], (_, { rows }) =>
+        this.setState({
+          data: rows._array,
+          refreshing: false
+        })
+      );
+    });
+  }
+
   render() {
     const { data } = this.state;
-    
+    console.log(data)
     return (
       <Container>
         <Header>
@@ -110,29 +138,34 @@ export default class FoodScreen extends React.Component {
           </Body>
         
           <Right>
-            <Button transparent onPress={() => this.props.navigation.navigate('FoodCreate')}>
+            <Button transparent onPress={() => this.props.navigation.navigate('FoodCreate', {success: this._success})}>
               <Icon name={Platform.OS === 'ios' ? 'ios-add' : 'md-add'} />
             </Button>
           </Right>
         </Header>
 
-        <Content refreshControl={
-        <RefreshControl
-          refreshing={this.state.refreshing}
-          onRefresh={this._onRefresh}
-        />
-      }>
-        <List>
-          {
-            data && data.map(item => {
-              return (
-                <ListItem key={item.id}>
-                  <Text>{item.name}</Text>
-                </ListItem>
-              )
-            })
-          }
-           
+        <Content 
+          refreshControl={
+            <RefreshControl
+              refreshing={this.state.refreshing}
+              onRefresh={this._onRefresh}/>}>
+
+          <List>
+            {
+              data && data.map(item => {
+                return (
+                  <ListItem subtitl key={item.id}>
+                  <Body>
+                    <Text>{item.name}</Text>
+                    <Text note>{item.note}</Text>
+                  </Body>
+                  <Right>
+                    <Text note>{item.date}</Text>
+                  </Right>
+                  </ListItem>
+                )
+              })
+            }
           </List>
         </Content>
 
