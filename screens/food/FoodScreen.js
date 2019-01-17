@@ -1,19 +1,14 @@
 import React from 'react';
 import {
-  Image,
-  ScrollView,
-  Text,
-  View,
   Platform,
   Alert,
   RefreshControl
 } from 'react-native';
-import { Container, Header, Left, Body, Right, Button, Icon, Title } from 'native-base';
+import { Container, Header, Left, Body, Right, Button, Icon, Title, List, ListItem, Text, Content } from 'native-base';
 
 import { WebBrowser, SQLite } from 'expo';
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from './FoodStyle';
-import { SearchBar, List, ListItem } from 'react-native-elements'
 
 
 const db = SQLite.openDatabase('db.db');
@@ -103,21 +98,44 @@ export default class FoodScreen extends React.Component {
     
     return (
       <Container>
-      <Header>
-        <Left>
-          <Button transparent>
-            <Icon name='arrow-back' />
-          </Button>
-        </Left>
-        <Body>
-          <Title>Header</Title>
-        </Body>
-        <Right>
-          <Button transparent onPress={() => this.props.navigation.navigate('FoodCreate')}>
-            <Icon name='menu' />
-          </Button>
-        </Right>
-      </Header>
+        <Header>
+          <Left>
+            <Button transparent onPress={() => {Alert.alert('메뉴')}}>
+              <Icon name={Platform.OS === 'ios' ? 'ios-menu' : 'md-menu '} />
+            </Button>
+          </Left>
+
+          <Body>
+            <Title>유통기한</Title>
+          </Body>
+        
+          <Right>
+            <Button transparent onPress={() => this.props.navigation.navigate('FoodCreate')}>
+              <Icon name={Platform.OS === 'ios' ? 'ios-add' : 'md-add'} />
+            </Button>
+          </Right>
+        </Header>
+
+        <Content refreshControl={
+        <RefreshControl
+          refreshing={this.state.refreshing}
+          onRefresh={this._onRefresh}
+        />
+      }>
+        <List>
+          {
+            data && data.map(item => {
+              return (
+                <ListItem key={item.id}>
+                  <Text>{item.name}</Text>
+                </ListItem>
+              )
+            })
+          }
+           
+          </List>
+        </Content>
+
     </Container>
     );
   }
