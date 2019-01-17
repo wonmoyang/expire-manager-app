@@ -1,10 +1,15 @@
 import React from 'react';
-import { ScrollView, Button, Alert, AsyncStorage } from 'react-native';
-import { FormLabel, FormInput, FormValidationMessage, Icon } from 'react-native-elements'
+import { ScrollView, Button, Alert } from 'react-native';
+import { FormLabel, FormInput, FormValidationMessage } from 'react-native-elements'
 import { Ionicons } from '@expo/vector-icons';
 import { getYear } from '../shared/common/DateUtil';
 
+import { SQLite } from 'expo';
+
 import { createStyle } from './FoodStyle';
+
+const db = SQLite.openDatabase('db.db');
+import { Query } from '../../config/Database';
 
 export default class FoodCreateScreen extends React.Component {
 
@@ -41,33 +46,13 @@ export default class FoodCreateScreen extends React.Component {
   };
 
   _save = async () => {
-    Alert.alert('save.');
-    console.log(this.state);
-
-    let expire = {
-      name: this.state.name,
-      date: this.state.date
-    }
-
-
-
-    try {
-      const expired = await AsyncStorage.getItem('@expires');
-      if(null === expired){
-        await AsyncStorage.setItem('@expires', JSON.stringify({1: expire}));
-      }else{
-        let num = Object.keys(JSON.parse(expired)).length + 1;
-        let data = {};
-        data[num] = expire;
-        await AsyncStorage.setItem('@expires', JSON.stringify(data));
-      }
-
-      const tt = await AsyncStorage.getItem('@expires');
-      console.log(tt);
-      debugger;
-    } catch (error) {
-      console.log(error)
-    }
+    db.transaction(tx => {
+      tx.executeSql('insert into expire (name, date) values (?, ?)', [
+        this.state.name,
+        this.state.date]);
+    });
+    Alert.alert('저장되었습니다.');
+    this.props.navigation.navigate('Food');
   }
 
   _onChangeName = (v) => {

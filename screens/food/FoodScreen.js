@@ -5,100 +5,120 @@ import {
   Text,
   View,
   Platform,
-  Alert
+  Alert,
+  RefreshControl
 } from 'react-native';
-import { WebBrowser } from 'expo';
+import { Container, Header, Left, Body, Right, Button, Icon, Title } from 'native-base';
+
+import { WebBrowser, SQLite } from 'expo';
 import { Ionicons } from '@expo/vector-icons';
 import { styles } from './FoodStyle';
+import { SearchBar, List, ListItem } from 'react-native-elements'
+
+
+const db = SQLite.openDatabase('db.db');
+import { Query } from '../../config/Database';
 
 export default class FoodScreen extends React.Component {
 
-
-  static navigationOptions = ({ navigation }) => {
-    return {
-      title: '유통기한',
-      headerBackTitle: '',
-      headerLeft: (
-        <Ionicons
-          name={Platform.OS === 'ios' ? 'ios-menu' : 'md-menu '}
-          onPress={() => {
-            Alert.alert('메뉴');
-          }}
-          size={32}
-          style={{ paddingLeft: 10 }}
-        />
-      ),
-      headerRight: (
-        <React.Fragment>
-        <Ionicons
-          name={Platform.OS === 'ios' ? 'ios-barcode' : 'md-barcode'}
-          onPress={() => navigation.navigate('FoodBarcode')}
-          size={32}
-          style={{ paddingRight: 10 }}
-        />
-        <Ionicons
-          name={Platform.OS === 'ios' ? 'ios-add' : 'md-add'}
-          onPress={() => navigation.navigate('FoodCreate')}
-          size={32}
-          style={{ paddingRight: 10 }}
-        />
-        </React.Fragment>
-      )
-    };
+  state = {
+    data: [],
+    refreshing: false,
+    isSearchBar: false
+  }
+  static navigationOptions = {
+    header: null,
+    bottom: null
   };
 
+  // static navigationOptions = ({ navigation }) => {
+  //   return {
+  //     title: '유통기한',
+  //     headerBackTitle: '',
+  //     headerLeft: (
+  //       <Ionicons
+  //         name={Platform.OS === 'ios' ? 'ios-menu' : 'md-menu '}
+  //         onPress={() => {
+  //           Alert.alert('메뉴');
+  //         }}
+  //         size={32}
+  //         style={{ paddingLeft: 10 }}
+  //       />
+  //     ),
+  //     headerRight: (
+  //       <React.Fragment>
+  //       <Ionicons
+  //         name={Platform.OS === 'ios' ? 'ios-barcode' : 'md-barcode'}
+  //         onPress={() => navigation.navigate('FoodBarcode')}
+  //         size={32}
+  //         style={{ paddingRight: 10 }}
+  //       />
+  //       <Ionicons
+  //         name={Platform.OS === 'ios' ? 'ios-add' : 'md-add'}
+  //         onPress={() => navigation.navigate('FoodCreate')}
+  //         size={32}
+  //         style={{ paddingRight: 10 }}
+  //       />
+  //       </React.Fragment>
+  //     )
+  //   };
+  // };
+
+  componentDidMount(){
+    db.transaction(tx => {
+      tx.executeSql('select * from expire', [], (_, { rows }) =>
+        this.setState({
+          data: rows._array
+        })
+      );
+    });
+
+    this.props.navigation.setParams({
+      _toggleSearchBar: this._toggleSearchBar
+    })
+
+  }
+
+  _toggleSearchBar = () => {
+    debugger;
+    this.setState({
+      isSearchBar: !this.state.isSearchBar
+    })
+  }
+
+  _onRefresh = () => {
+    this.setState({refreshing: true});
+    db.transaction(tx => {
+      tx.executeSql('select * from expire', [], (_, { rows }) =>
+        this.setState({
+          data: rows._array,
+          refreshing: false
+        })
+      );
+    });
+  }
 
   render() {
+    const { data } = this.state;
     
     return (
-      <View style={styles.container}>
-        <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
-          <View style={styles.welcomeContainer}>
-            <Image
-              source={
-                __DEV__
-                  ? require('../../assets/images/robot-dev.png')
-                  : require('../../assets/images/robot-prod.png')
-              }
-              style={styles.welcomeImage}
-            />
-          </View>
-          <Text style={styles.getStartedText}>
-              {'메인 영역 ( 음식 유통기한 리스트 )'}
-          </Text>
-          {/*
-          <View style={styles.getStartedContainer}>
-            {this._maybeRenderDevelopmentModeWarning()}
-
-            <Text style={styles.getStartedText}>Get started by opening</Text>
-
-            <View style={[styles.codeHighlightContainer, styles.foodScreenFilename]}>
-              <MonoText style={styles.codeHighlightText}>screens/FoodScreen.js</MonoText>
-            </View>
-
-            <Text style={styles.getStartedText}>
-              Change this text and your app will automatically reload.
-            </Text>
-          </View>
-
-          <View style={styles.helpContainer}>
-            <TouchableOpacity onPress={this._handleHelpPress} style={styles.helpLink}>
-              <Text style={styles.helpLinkText}>Help, it didn’t automatically reload!</Text>
-            </TouchableOpacity>
-          </View>
-
-          */}
-        </ScrollView>
-          {/*
-        <View style={styles.tabBarInfoContainer}>
-          <Text style={styles.tabBarInfoText}>This is a tab bar. You can edit it in:</Text>
-
-          <View style={[styles.codeHighlightContainer, styles.navigationFilename]}>
-            <MonoText style={styles.codeHighlightText}>navigation/MainTabNavigator.js</MonoText>
-          </View>
-        </View>
-          */}
-      </View>
+      <Container>
+      <Header>
+        <Left>
+          <Button transparent>
+            <Icon name='arrow-back' />
+          </Button>
+        </Left>
+        <Body>
+          <Title>Header</Title>
+        </Body>
+        <Right>
+          <Button transparent onPress={() => this.props.navigation.navigate('FoodCreate')}>
+            <Icon name='menu' />
+          </Button>
+        </Right>
+      </Header>
+    </Container>
     );
   }
 
