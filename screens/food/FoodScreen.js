@@ -2,7 +2,10 @@ import React from 'react';
 import {
   Platform,
   Alert,
-  RefreshControl
+  RefreshControl,
+  ListView,
+  ScrollView,
+  TouchableOpacity 
 } from 'react-native';
 import { 
   Container, 
@@ -29,13 +32,45 @@ import { styles } from './FoodStyle';
 const db = SQLite.openDatabase('db.db');
 import { Query } from '../../config/Database';
 
+const datas = [
+  'Simon Mignolet',
+  'Nathaniel Clyne',
+  'Dejan Lovren',
+  'Mama Sakho',
+  'Alberto Moreno',
+  'Emre Can',
+  'Joe Allen',
+  'Phil Coutinho',
+];
+
+const datas2 = [
+  {id:1, name: 'test', date: '2018-0101'}, {id:2, name: 'test2', date: '2018-0101'}
+]
+
 export default class FoodScreen extends React.Component {
 
   state = {
     data: [],
     refreshing: false,
-    isSearchBar: false
+    isSearchBar: false,
+
+    basic: false,
+    listViewData: []
   }
+
+  constructor(props){
+    super(props);
+    
+    this.ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
+    this.state = {
+      basic: true,
+      listViewData: datas2,
+    };
+    this.selectedRow;
+    this.component=[];
+
+  }
+
   static navigationOptions = {
     header: null,
     bottom: null
@@ -97,11 +132,19 @@ export default class FoodScreen extends React.Component {
     });
   }
 
+  deleteRow(secId, rowId, rowMap) {
+    debugger;
+    rowMap[`${secId}${rowId}`].props.closeRow();
+    const newData = [...this.state.listViewData];
+    newData.splice(rowId, 1);
+    this.setState({ listViewData: newData });
+  }
+
   render() {
     const { data, isSearchBar } = this.state;
-    
+    const ds = new ListView.DataSource({ rowHasChanged: (r1, r2) => r1 !== r2 });
     return (
-      <Container>
+      <Container style={{flex: 1}}>
         
         {
           isSearchBar 
@@ -132,39 +175,74 @@ export default class FoodScreen extends React.Component {
             </Header>)
         }
 
-        <Content 
+        <Content contentContainerStyle={{flex: 1}}
+          bounces={false}
+          on
           refreshControl={
             <RefreshControl
               refreshing={this.state.refreshing}
               onRefresh={this._onRefresh}/>}>
               {
-                (data.length > 0)
-                  ? (
-                      <List>
-                        {
-                          data.map(item => {
-                            return (
-                              <ListItem subtitle key={item.id}>
-                              <Body>
-                                <Text>{item.name}</Text>
-                                <Text note>{item.note}</Text>
-                              </Body>
-                              <Right>
-                                <Text note>{item.date}</Text>
-                              </Right>
-                              </ListItem>
-                            )
-                          })
+                 (data && data.length > 0)
+                   ? (
+                      <React.Fragment>
+                      <List 
+                        leftOpenValue={75}
+                        rightOpenValue={-75}
+                        dataSource={this.ds.cloneWithRows(this.state.data)}
+                        renderRow={(data2, secId, rowId, rowMap) =>{
+                          debugger;
+                          return (
+                          <ListItem button onPress={() => {Alert.alert('dd')}} key={data2.id} style={{height:80}}>
+                            <Body>
+                              <Text> {data2.name} </Text>
+                              <Text note> {data2.date} </Text>
+                            </Body>
+                          </ListItem>      
+                          )
+                          }
                         }
-                      </List>
-                    )
-                    : (
-                        <View flex height={500} justifyContent={'center'} alignItems={'center'}>
-                          <Text style={{fontSize: 16}}>
-                            검색 결과가 없습니다.
-                          </Text>
-                        </View>
-                      )
+                        onRowOpen={(a,b) => {
+                          Alert.alert(a);
+                          Alert.alert(b);
+                        }}
+                        renderLeftHiddenRow={data2 =>
+                          <Button full onPress={() => alert(data2)}>
+                            <Icon active name="information-circle" />
+                          </Button>}
+                        renderRightHiddenRow={(data2, secId, rowId, rowMap) =>
+                          <Button full danger onPress={_ => this.deleteRow(secId, rowId, rowMap)}>
+                            <Icon active name="trash" />
+                          </Button>}
+                      />
+                      <Button style={{ margin: 20 }} onPress={() => this.selectedRow._root.closeRow()}><Text>Close row</Text></Button>
+                      </React.Fragment>
+                      // <List>
+                      //   {
+                      //     data.map(item => {
+                      //       return (
+                      //         <ListItem subtitle key={item.id}>
+                      //         <Body>
+                      //           <Text>{item.name}</Text>
+                      //           <Text note>{item.note}</Text>
+                      //         </Body>
+                      //         <Right>
+                      //           <Text note>{item.date}</Text>
+                      //         </Right>
+                      //         </ListItem>
+                      //       )
+                      //     })
+                      //   }
+                      // </List>
+
+                     )
+                     : (
+                         <View flex height={500} justifyContent={'center'} alignItems={'center'}>
+                           <Text style={{fontSize: 16}}>
+                             검색 결과가 없습니다.
+                           </Text>
+                         </View>
+                       )
               }
         </Content>
 
