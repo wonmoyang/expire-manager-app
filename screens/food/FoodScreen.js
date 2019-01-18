@@ -20,11 +20,11 @@ import {
   SwipeRow,
   View
 } from 'native-base';
+import SearchBar from '../../components/SearchBar';
+import * as service from './food.service';
 
 import { WebBrowser, SQLite } from 'expo';
-import { Ionicons } from '@expo/vector-icons';
 import { styles } from './FoodStyle';
-
 
 const db = SQLite.openDatabase('db.db');
 import { Query } from '../../config/Database';
@@ -41,39 +41,6 @@ export default class FoodScreen extends React.Component {
     bottom: null
   };
 
-  // static navigationOptions = ({ navigation }) => {
-  //   return {
-  //     title: '유통기한',
-  //     headerBackTitle: '',
-  //     headerLeft: (
-  //       <Ionicons
-  //         name={Platform.OS === 'ios' ? 'ios-menu' : 'md-menu '}
-  //         onPress={() => {
-  //           Alert.alert('메뉴');
-  //         }}
-  //         size={32}
-  //         style={{ paddingLeft: 10 }}
-  //       />
-  //     ),
-  //     headerRight: (
-  //       <React.Fragment>
-  //       <Ionicons
-  //         name={Platform.OS === 'ios' ? 'ios-barcode' : 'md-barcode'}
-  //         onPress={() => navigation.navigate('FoodBarcode')}
-  //         size={32}
-  //         style={{ paddingRight: 10 }}
-  //       />
-  //       <Ionicons
-  //         name={Platform.OS === 'ios' ? 'ios-add' : 'md-add'}
-  //         onPress={() => navigation.navigate('FoodCreate')}
-  //         size={32}
-  //         style={{ paddingRight: 10 }}
-  //       />
-  //       </React.Fragment>
-  //     )
-  //   };
-  // };
-
   componentDidMount(){
     db.transaction(tx => {
       tx.executeSql('select * from expire', [], (_, { rows }) =>
@@ -82,91 +49,123 @@ export default class FoodScreen extends React.Component {
         })
       );
     });
-
-    this.props.navigation.setParams({
-      _toggleSearchBar: this._toggleSearchBar
-    })
   }
   
   shouldComponentUpdate(nextProps, nextState) {
     return true;
-}
+  }
+  
+  _search = async (name='') => {
+    let expires = [];
+    expires = await service.search(name);
 
-  _toggleSearchBar = () => {
+    this.setState({
+      data: expires
+    });
+  }
+  _toggleSearchBar = async () => {
+
+    if(this.state.isSearchBar)
+      this._findAll();
+      
     this.setState({
       isSearchBar: !this.state.isSearchBar
     })
   }
 
-  _onRefresh = () => {
+  /**
+   * 스크롤 refresh
+   */
+  _onRefresh = async () => {
     this.setState({refreshing: true});
-    db.transaction(tx => {
-      tx.executeSql('select * from expire', [], (_, { rows }) =>
-        this.setState({
-          data: rows._array,
-          refreshing: false
-        })
-      );
+
+    let expires = await service.findAll();
+    this.setState({
+      data: expires,
+      refreshing: false
     });
   }
 
-  _success = () => {
-    db.transaction(tx => {
-      tx.executeSql('select * from expire', [], (_, { rows }) =>
-        this.setState({
-          data: rows._array,
-          refreshing: false
-        })
-      );
+
+  /**
+   * 상품입력 성공
+   */
+  _findAll = async () => {
+    let expires = await service.findAll();
+    this.setState({
+      data: expires
     });
   }
 
   render() {
-    const { data } = this.state;
-    console.log(data)
+    const { data, isSearchBar } = this.state;
+    
     return (
       <Container>
-        <Header>
-          <Left>
-            <Button transparent onPress={() => {Alert.alert('메뉴')}}>
-              <Icon name={Platform.OS === 'ios' ? 'ios-menu' : 'md-menu '} />
-            </Button>
-          </Left>
-
-          <Body>
-            <Title>유통기한</Title>
-          </Body>
         
-          <Right>
-            <Button transparent onPress={() => this.props.navigation.navigate('FoodCreate', {success: this._success})}>
-              <Icon name={Platform.OS === 'ios' ? 'ios-add' : 'md-add'} />
-            </Button>
-          </Right>
-        </Header>
+        {
+          isSearchBar 
+            ? (
+              <SearchBar 
+                toggle={this._toggleSearchBar}
+                search={this._search}/>) 
+            : (
+              <Header>
+              <Left>
+                <Button transparent onPress={() => {Alert.alert('메뉴')}}>
+                  <Icon name={Platform.OS === 'ios' ? 'ios-menu' : 'md-menu '} />
+                </Button>
+              </Left>
+    
+              <Body>
+                <Title>유통기한</Title>
+              </Body>
+            
+              <Right>
+                <Button transparent onPress={() => {this._toggleSearchBar()}}>
+                  <Icon name={Platform.OS === 'ios' ? 'ios-search' : 'md-search'} />
+                </Button>
+                <Button transparent onPress={() => this.props.navigation.navigate('FoodCreate', {success: this._findAll})}>
+                  <Icon name={Platform.OS === 'ios' ? 'ios-add' : 'md-add'} />
+                </Button>
+              </Right>
+            </Header>)
+        }
 
         <Content 
           refreshControl={
             <RefreshControl
               refreshing={this.state.refreshing}
               onRefresh={this._onRefresh}/>}>
-
-          <List>
-            {
-              data && data.map(item => {
-                return (
-                  <ListItem subtitl key={item.id}>
-                  <Body>
-                    <Text>{item.name}</Text>
-                    <Text note>{item.note}</Text>
-                  </Body>
-                  <Right>
-                    <Text note>{item.date}</Text>
-                  </Right>
-                  </ListItem>
-                )
-              })
-            }
-          </List>
+              {
+                (data.length > 0)
+                  ? (
+                      <List>
+                        {
+                          data.map(item => {
+                            return (
+                              <ListItem subtitle key={item.id}>
+                              <Body>
+                                <Text>{item.name}</Text>
+                                <Text note>{item.note}</Text>
+                              </Body>
+                              <Right>
+                                <Text note>{item.date}</Text>
+                              </Right>
+                              </ListItem>
+                            )
+                          })
+                        }
+                      </List>
+                    )
+                    : (
+                        <View flex height={500} justifyContent={'center'} alignItems={'center'}>
+                          <Text style={{fontSize: 16}}>
+                            검색 결과가 없습니다.
+                          </Text>
+                        </View>
+                      )
+              }
         </Content>
 
     </Container>

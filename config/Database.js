@@ -4,6 +4,6 @@ export const Query = {
               
         SAVE: 'INSERT INTO expire (name, note, date) VALUES (?, ?, ?)',
         SELECT_ALL: 'SELECT * FROM expire',
-        SELECT_ALL_FOR_ID: 'SELECT * FROM expire WHERE name = ?'
+        SELECT_ALL_FOR_NAME: "SELECT * FROM expire WHERE name LIKE ?"
     }
 }
